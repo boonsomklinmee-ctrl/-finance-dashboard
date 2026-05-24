@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sinsamut Finance Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><img src="assets/avatar.png" alt=""><div><b>Sinsamut</b><span>Finance Dashboard</span></div></div>
+    <div class="profile"><img src="assets/avatar.png" alt=""><h3 id="profileName">Sinsamut and My Gang</h3><p>@SinsamutKlinmee</p></div>
+    <nav>
+      <a class="active" data-view="dashboard">⌂ ภาพรวม</a>
+      <a data-view="transactions">▣ รายการเงิน</a>
+      <a data-view="income">＋ รายรับ</a>
+      <a data-view="expense">－ รายจ่าย</a>
+      <a data-view="categories">◫ หมวดหมู่</a>
+      <a data-view="salary">👥 เงินเดือนทีมงาน</a>
+      <a data-view="reports">▥ รายงาน & กราฟ</a>
+      <a data-view="settings">⚙ ตั้งค่า</a>
+    </nav>
+    <div class="profitBox"><small>กำไรสุทธิเดือนที่เลือก</small><strong id="yearProfit">฿ 0</strong><span>จากรายการจริง</span></div>
+    <div class="quote">“วันนี้ขยัน<br>คือกำไรของวันหน้า”<br><small>- Sinsamut Klinmee</small></div>
+  </aside>
+
+  <main>
+    <header class="hero">
+      <img src="assets/banner.png" alt="banner">
+      <div class="heroText"><h1 id="dashboardTitle">SINSAMUT KLINMEE</h1><p>SINSAMUT AND MY GANG</p></div>
+      <select id="monthFilter"></select>
+    </header>
+
+    <section class="cards" data-section="dashboard reports">
+      <div class="card green"><span>💵</span><p>รายได้รวม</p><h2 id="incomeTotal">฿ 0</h2><small>จากรายการรายรับ</small></div>
+      <div class="card red"><span>💳</span><p>รายจ่ายรวม</p><h2 id="expenseTotal">฿ 0</h2><small>จากรายการรายจ่าย</small></div>
+      <div class="card green"><span>📈</span><p>กำไรสุทธิ</p><h2 id="netProfit">฿ 0</h2><small>รายได้ - รายจ่าย</small></div>
+      <div class="card purple"><span>★</span><p>เงินสปอนเซอร์</p><h2 id="sponsorTotal">฿ 0</h2><small>หมวดสปอนเซอร์</small></div>
+      <div class="card orange"><span>🚗</span><p>ค่าเดินทาง</p><h2 id="travelTotal">฿ 0</h2><small>หมวดค่าเดินทาง</small></div>
+      <div class="card blue"><span>👥</span><p>เงินเดือนทีมงาน</p><h2 id="salaryTotal">฿ 0</h2><small>หมวดทีมงาน</small></div>
+    </section>
+
+    <section class="grid" data-section="dashboard income expense reports salary">
+      <div class="panel chartPanel" data-section="dashboard reports"><h3>รายรับ vs รายจ่าย เดือนที่เลือก</h3><canvas id="barChart" height="210"></canvas></div>
+      <div class="panel chartPanel" data-section="dashboard reports expense"><h3>สัดส่วนรายจ่ายตามหมวดหมู่</h3><canvas id="donutChart" height="210"></canvas></div>
+      <div class="panel addPanel" data-section="dashboard income expense salary">
+        <h3>เพิ่มรายการ</h3>
+        <form id="entryForm">
+          <input type="date" id="date" required>
+          <input type="text" id="title" placeholder="รายการ เช่น เงินเดือนทีมงาน" required>
+          <select id="type"><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select>
+          <select id="category"></select>
+          <input type="number" id="amount" placeholder="จำนวนเงิน" min="0" step="0.01" required>
+          <input type="text" id="note" placeholder="หมายเหตุ">
+          <button type="submit">＋ เพิ่มรายการ</button>
+        </form>
+        <div class="miniSummary"><b>สรุปเดือนที่เลือก</b><p>รายรับ <span id="miniIncome">฿ 0</span></p><p>รายจ่าย <span id="miniExpense">฿ 0</span></p><p>กำไร <span id="miniProfit">฿ 0</span></p></div>
+      </div>
+    </section>
+
+    <section class="manageWrap" data-section="categories">
+      <div class="panel categoryManager">
+        <div class="sectionHead">
+          <div><h3>จัดการหมวดหมู่</h3><p>เพิ่มหมวดหมู่รายรับ/รายจ่าย แล้วระบบจะนำไปใช้ในฟอร์มและกราฟทันที</p></div>
+        </div>
+        <form id="categoryForm" class="inlineForm">
+          <select id="newCategoryType"><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select>
+          <input type="text" id="newCategoryName" placeholder="ชื่อหมวดหมู่ใหม่" required>
+          <button type="submit">＋ เพิ่มหมวดหมู่</button>
+        </form>
+        <div class="categoryColumns">
+          <div><h4>รายรับ</h4><div id="incomeCategoryList" class="pillList"></div></div>
+          <div><h4>รายจ่าย</h4><div id="expenseCategoryList" class="pillList"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="manageWrap" data-section="settings">
+      <div class="panel settingsPanel">
+        <div class="sectionHead"><div><h3>ตั้งค่า</h3><p>ตั้งค่าหน้า Dashboard และบันทึกไว้ในเครื่องนี้</p></div></div>
+        <form id="settingsForm" class="settingsGrid">
+          <label>ชื่อ Dashboard<input type="text" id="settingDashboardName"></label>
+          <label>ชื่อโปรไฟล์<input type="text" id="settingProfileName"></label>
+          <label>สกุลเงิน<input type="text" id="settingCurrency" maxlength="4"></label>
+          <label>ธีม<select id="settingTheme"><option value="dark">Dark</option><option value="compact">Compact</option></select></label>
+          <button type="submit">บันทึกการตั้งค่า</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="tableWrap panel" data-section="dashboard transactions income expense salary">
+      <div class="tableHead"><h3>รายการล่าสุด</h3><div class="tableActions"><button type="button" id="printBtn">ดาวน์โหลด PDF</button><button type="button" id="resetBtn">ล้างข้อมูล</button></div></div>
+      <table><thead><tr><th>วันที่</th><th>รายการ</th><th>ประเภท</th><th>หมวดหมู่</th><th>รายรับ</th><th>รายจ่าย</th><th>หมายเหตุ</th><th></th></tr></thead><tbody id="tbody"></tbody></table>
+    </section>
+    <div id="toast" class="toast" hidden></div>
+  </main>
+  <script src="script.js?v=20260525-2"></script>
+</body>
+</html>
