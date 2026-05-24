@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sinsamut Finance Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><img src="assets/avatar.png" alt=""><div><b>Sinsamut</b><span>Finance Dashboard</span></div></div>
+    <div class="profile"><img src="assets/avatar.png" alt=""><h3 id="profileName">Sinsamut and My Gang</h3><p>@SinsamutKlinmee</p></div>
+    <nav>
+      <a class="active" data-view="dashboard">⌂ ภาพรวม</a>
+      <a data-view="transactions">▣ รายการเงิน</a>
+      <a data-view="income">＋ รายรับ</a>
+      <a data-view="expense">－ รายจ่าย</a>
+      <a data-view="categories">◫ หมวดหมู่</a>
+      <a data-view="salary">👥 เงินเดือนทีมงาน</a>
+      <a data-view="reports">▥ รายงาน & กราฟ</a>
+      <a data-view="settings">⚙ ตั้งค่า</a>
+    </nav>
+    <div class="profitBox"><small>กำไรสุทธิเดือนที่เลือก</small><strong id="yearProfit">฿ 0</strong><span>จากรายการจริง</span></div>
+    <div class="quote">“วันนี้ขยัน<br>คือกำไรของวันหน้า”<br><small>- Sinsamut Klinmee</small></div>
+  </aside>
+
+  <main>
+    <header class="hero">
+      <img src="assets/banner.png" alt="banner">
+      <div class="heroText"><h1 id="dashboardTitle">SINSAMUT KLINMEE</h1><p>SINSAMUT AND MY GANG</p></div>
+      <select id="monthFilter"></select>
+    </header>
+
+    <section class="cards" data-section="dashboard reports">
+      <div class="card green"><span>💵</span><p>รายได้รวม</p><h2 id="incomeTotal">฿ 0</h2><small>จากรายการรายรับ</small></div>
+      <div class="card red"><span>💳</span><p>รายจ่ายรวม</p><h2 id="expenseTotal">฿ 0</h2><small>จากรายการรายจ่าย</small></div>
+      <div class="card green"><span>📈</span><p>กำไรสุทธิ</p><h2 id="netProfit">฿ 0</h2><small>รายได้ - รายจ่าย</small></div>
+      <div class="card purple"><span>★</span><p>เงินสปอนเซอร์</p><h2 id="sponsorTotal">฿ 0</h2><small>หมวดสปอนเซอร์</small></div>
+      <div class="card orange"><span>🚗</span><p>ค่าเดินทาง</p><h2 id="travelTotal">฿ 0</h2><small>หมวดค่าเดินทาง</small></div>
+      <div class="card blue"><span>👥</span><p>เงินเดือนทีมงาน</p><h2 id="salaryTotal">฿ 0</h2><small>หมวดทีมงาน</small></div>
+    </section>
+
+    <section class="grid" data-section="dashboard income expense reports salary">
+      <div class="panel chartPanel" data-section="dashboard reports"><h3>รายรับ vs รายจ่าย เดือนที่เลือก</h3><canvas id="barChart" height="210"></canvas></div>
+      <div class="panel chartPanel" data-section="dashboard reports expense"><h3>สัดส่วนรายจ่ายตามหมวดหมู่</h3><canvas id="donutChart" height="210"></canvas></div>
+      <div class="panel addPanel" data-section="dashboard income expense salary">
+        <h3>เพิ่มรายการ</h3>
+        <form id="entryForm">
+          <input type="date" id="date" required>
+          <input type="text" id="title" placeholder="รายการ เช่น เงินเดือนทีมงาน" required>
+          <select id="type"><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select>
+          <select id="category"></select>
+          <input type="number" id="amount" placeholder="จำนวนเงิน" min="0" step="0.01" required>
+          <input type="text" id="note" placeholder="หมายเหตุ">
+          <button type="submit">＋ เพิ่มรายการ</button>
+        </form>
+        <div class="miniSummary"><b>สรุปเดือนที่เลือก</b><p>รายรับ <span id="miniIncome">฿ 0</span></p><p>รายจ่าย <span id="miniExpense">฿ 0</span></p><p>กำไร <span id="miniProfit">฿ 0</span></p></div>
+      </div>
+    </section>
+
+    <section class="manageWrap" data-section="categories">
+      <div class="panel categoryManager">
+        <div class="sectionHead">
+          <div><h3>จัดการหมวดหมู่</h3><p>เพิ่มหมวดหมู่รายรับ/รายจ่าย แล้วระบบจะนำไปใช้ในฟอร์มและกราฟทันที</p></div>
+        </div>
+        <form id="categoryForm" class="inlineForm">
+          <select id="newCategoryType"><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select>
+          <input type="text" id="newCategoryName" placeholder="ชื่อหมวดหมู่ใหม่" required>
+          <button type="submit">＋ เพิ่มหมวดหมู่</button>
+        </form>
+        <div class="categoryColumns">
+          <div><h4>รายรับ</h4><div id="incomeCategoryList" class="pillList"></div></div>
+          <div><h4>รายจ่าย</h4><div id="expenseCategoryList" class="pillList"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="manageWrap" data-section="settings">
+      <div class="panel settingsPanel">
+        <div class="sectionHead"><div><h3>ตั้งค่า</h3><p>ตั้งค่าหน้า Dashboard และบันทึกไว้ในเครื่องนี้</p></div></div>
+        <form id="settingsForm" class="settingsGrid">
+          <label>ชื่อ Dashboard<input type="text" id="settingDashboardName"></label>
+          <label>ชื่อโปรไฟล์<input type="text" id="settingProfileName"></label>
+          <label>สกุลเงิน<input type="text" id="settingCurrency" maxlength="4"></label>
+          <label>ธีม<select id="settingTheme"><option value="dark">Dark</option><option value="compact">Compact</option></select></label>
+          <button type="submit">บันทึกการตั้งค่า</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="tableWrap panel" data-section="dashboard transactions income expense salary">
+      <div class="tableHead"><h3>รายการล่าสุด</h3><div class="tableActions"><button type="button" id="printBtn">ดาวน์โหลด PDF</button><button type="button" id="resetBtn">ล้างข้อมูล</button></div></div>
+      <table><thead><tr><th>วันที่</th><th>รายการ</th><th>ประเภท</th><th>หมวดหมู่</th><th>รายรับ</th><th>รายจ่าย</th><th>หมายเหตุ</th><th></th></tr></thead><tbody id="tbody"></tbody></table>
+    </section>
+    <div id="toast" class="toast" hidden></div>
+  </main>
+  <script src="script.js?v=20260525-2"></script>
+</body>
+</html>
+
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700;800&display=swap');
+*{box-sizing:border-box}
+body{margin:0;font-family:Kanit,Arial,sans-serif;background:#090a0c;color:#f6f6f6;display:flex}
+body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at top,#24272d 0,#090a0c 48%,#050506 100%);z-index:-1}
+[hidden]{display:none!important}
+.sidebar{width:260px;min-height:100vh;background:linear-gradient(180deg,#12151a,#08090b);border-right:1px solid #252932;padding:18px 14px;position:sticky;top:0}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}
+.brand img{width:52px;height:52px;border-radius:50%;object-fit:cover}
+.brand b{display:block;font-size:20px}.brand span,.profile p,small{color:#aeb4bf}
+.profile{text-align:center;margin-bottom:22px}.profile img{width:118px;height:118px;border-radius:50%;object-fit:cover;border:2px solid #222}
+.profile h3{font-size:18px;margin:10px 0 0}.profile p{margin:0;font-size:13px}
+nav{display:flex;flex-direction:column;gap:8px}
+nav a{padding:13px 14px;border-radius:14px;color:#dfe3ea;text-decoration:none;cursor:pointer}
+nav a.active,nav a:hover{background:linear-gradient(90deg,#3b3941,#25262d);border-left:3px solid #ff4d4d}
+.profitBox,.quote{margin-top:28px;padding:18px;border:1px solid #2a2f38;border-radius:14px;background:linear-gradient(145deg,#1b2027,#101216)}
+.profitBox strong{display:block;color:#5bed69;font-size:25px;margin:8px 0}.profitBox span{font-size:12px;color:#bbc}
+.quote{text-align:center;line-height:1.9;color:#e9e9e9}
+main{flex:1;padding-bottom:30px;min-width:0}
+.hero{height:150px;position:relative;overflow:hidden;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:center}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.68}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#111 0%,transparent 30%,#111 100%)}
+.heroText{position:relative;z-index:1;text-align:center}.heroText h1{font-size:52px;letter-spacing:0;margin:0;font-weight:800}.heroText p{margin:4px 0;font-weight:600}
+#monthFilter{position:absolute;right:32px;top:24px;z-index:2;background:#12151a;color:#fff;border:1px solid #333;border-radius:10px;padding:10px 14px}
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;padding:18px}
+.card,.panel{background:linear-gradient(145deg,rgba(35,39,47,.95),rgba(17,19,23,.95));border:1px solid #2a2f38;border-radius:14px;box-shadow:0 12px 35px #0005}
+.card{padding:18px;position:relative;overflow:hidden;min-height:118px}.card:before{content:"";position:absolute;width:100px;height:100px;border-radius:50%;right:-35px;top:-40px;opacity:.18;background:currentColor}
+.card span{float:left;width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font-size:24px;margin-right:13px;background:currentColor;color:#fff}
+.green{color:#64dd6a}.red{color:#ff5a55}.purple{color:#b26cff}.orange{color:#ffb02e}.blue{color:#69a7ff}
+.card p{color:#fff;margin:2px 0}.card h2{color:#fff;margin:3px 0;font-size:24px;line-height:1.15}
+.grid{display:grid;grid-template-columns:1.35fr 1fr 290px;gap:14px;padding:0 18px 18px}.panel{padding:18px}.panel h3{margin:0 0 15px}
+.chartPanel canvas{display:block;width:100%;height:210px;max-width:100%}
+.addPanel input,.addPanel select,.addPanel button{width:100%;padding:12px;margin-bottom:10px;border-radius:10px;border:1px solid #313842;background:#0d0f12;color:#fff}
+.addPanel button{background:linear-gradient(90deg,#1d8c28,#2aa639);border:0;font-weight:700;cursor:pointer}
+.miniSummary{margin-top:8px;padding:12px;border-radius:12px;background:#101318}.miniSummary p{display:flex;justify-content:space-between;margin:8px 0}
+.tableWrap{margin:0 18px}.tableHead{display:flex;justify-content:space-between;align-items:center;gap:14px}.tableActions{display:flex;gap:8px;flex-wrap:wrap}.tableHead button{background:#171a20;color:#fff;border:1px solid #333;border-radius:10px;padding:9px 12px;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:13px 12px;border-bottom:1px solid #2a2f38;text-align:left}th{color:#d6d9df;background:#11141a}td{color:#e9edf3}
+.tag{padding:4px 9px;border-radius:99px;font-size:12px;font-weight:700}.income{background:#163d22;color:#6dff82}.expense{background:#441d1d;color:#ff6a61}
+.del{background:none;border:0;color:#ff7272;font-size:18px;cursor:pointer}
+.manageWrap{padding:0 18px 18px}.sectionHead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}.sectionHead h3{margin:0 0 6px}.sectionHead p{margin:0;color:#aeb4bf}
+.inlineForm,.settingsGrid{display:grid;gap:10px}.inlineForm{grid-template-columns:180px 1fr 180px}
+.inlineForm input,.inlineForm select,.inlineForm button,.settingsGrid input,.settingsGrid select,.settingsGrid button{width:100%;padding:12px;border-radius:10px;border:1px solid #313842;background:#0d0f12;color:#fff}
+.inlineForm button,.settingsGrid button{background:linear-gradient(90deg,#1d8c28,#2aa639);border:0;font-weight:700;cursor:pointer}
+.categoryColumns{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.categoryColumns h4{margin:0 0 10px}
+.pillList{display:flex;flex-wrap:wrap;gap:10px}.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;background:#11151b;border:1px solid #303743;color:#e9edf3}.pill button{display:grid;place-items:center;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:#3a2024;color:#ff8a8a;cursor:pointer}
+.settingsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.settingsGrid label{display:grid;gap:7px;color:#cdd3dd}.settingsGrid button{grid-column:1/-1}
+.toast{position:fixed;right:22px;bottom:22px;z-index:20;background:#172019;border:1px solid #2d8f38;color:#eaffea;border-radius:10px;padding:12px 16px;box-shadow:0 16px 40px #0008}
+.compactTheme .card,.compactTheme .panel{border-radius:8px}.compactTheme .card{padding:14px}.compactTheme .panel{padding:14px}
+@media(max-width:1200px){.cards{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.sidebar{display:none}.inlineForm,.settingsGrid,.categoryColumns{grid-template-columns:1fr}}
+@media(max-width:700px){body{display:block}.heroText h1{font-size:30px}.cards{grid-template-columns:1fr}.tableWrap{overflow:auto}.hero{height:120px}.tableHead{align-items:flex-start;flex-direction:column}.inlineForm{grid-template-columns:1fr}}
+@media print{body{display:block;background:#fff;color:#111}body:before,.sidebar,.hero img,.hero:after,.addPanel,.manageWrap,.toast,.tableActions,.del{display:none!important}main{padding:0}.hero{height:auto;border:0;padding:0 0 12px}.heroText h1{font-size:26px;color:#111}.heroText p:after{content:" - " attr(data-report-month)}.cards{grid-template-columns:repeat(3,1fr);padding:0 0 12px}.card,.panel{box-shadow:none;background:#fff;border:1px solid #ccc;color:#111}.card span{display:none}.card p,.card h2,td,th{color:#111}.grid{grid-template-columns:1fr 1fr;padding:0 0 12px}.chartPanel canvas{height:190px}.tableWrap{margin:0}th{background:#eee;color:#111}.tag{border:1px solid #bbb}.income,.expense{background:#fff;color:#111}.quote,.profitBox{background:#fff;color:#111}.profitBox strong{color:#111}}
+
+const DEFAULT_SETTINGS = {
+  dashboardName: 'SINSAMUT KLINMEE',
+  profileName: 'Sinsamut and My Gang',
+  currency: '฿',
+  theme: 'dark'
+};
+
+const DEFAULT_CATEGORIES = {
+  income: [
+    'YouTube Ads',
+    'สปอนเซอร์',
+    'Affiliate',
+    'งานถ่ายวิดีโอ',
+    'ขายของ',
+    'รีวิวสินค้า',
+    'คอร์สออนไลน์',
+    'ไลฟ์สด / Super Chat',
+    'ขายภาพ / ฟุตเทจ',
+    'ที่ปรึกษาคอนเทนต์',
+    'ค่าลิขสิทธิ์',
+    'รายได้อื่นๆ'
+  ],
+  expense: [
+    'เงินเดือนทีมงาน',
+    'ค่าเดินทาง',
+    'ค่าอาหารทีมงาน',
+    'ค่าอุปกรณ์',
+    'ค่าที่พัก',
+    'ค่าโปรโมท',
+    'ค่าเช่าสตูดิโอ',
+    'ค่าซอฟต์แวร์',
+    'ค่าอินเทอร์เน็ต / โทรศัพท์',
+    'ค่าพร็อพ / ฉาก',
+    'ค่าตัดต่อ',
+    'ค่ากล้อง / ไฟ / เสียง',
+    'ภาษี / ค่าธรรมเนียม',
+    'เงินสำรองฉุกเฉิน',
+    'อื่นๆ'
+  ]
+};
+
+const clone = value => JSON.parse(JSON.stringify(value));
+const months = [];
+const demo = [];
+const legacyDemoTitles = new Set([
+  'YouTube Ads (พ.ค. 2025)',
+  'สปอนเซอร์รีวิวสินค้า',
+  'ค่าน้ำมัน',
+  'เงินเดือนโค้ชซน',
+  'ค่าอาหารทีมงาน',
+  'ค่าอุปกรณ์ถ่ายทำ',
+  'ค่าจ้างตัดต่อ',
+  'งานถ่ายวิดีโอ'
+]);
+const dataModeVersion = 'production-empty-v1';
+
+applyDataModeMigration();
+let entries = loadEntries();
+let categories = load('ytFinanceCategories', DEFAULT_CATEGORIES);
+let settings = load('ytFinanceSettings', DEFAULT_SETTINGS);
+let activeView = 'dashboard';
+let selectedMonth = getCurrentMonthKey();
+
+const $ = id => document.getElementById(id);
+const saveEntries = () => localStorage.setItem('ytFinanceEntries', JSON.stringify(entries));
+const saveCategories = () => localStorage.setItem('ytFinanceCategories', JSON.stringify(categories));
+const saveSettings = () => localStorage.setItem('ytFinanceSettings', JSON.stringify(settings));
+const fmt = n => `${settings.currency || '฿'} ${Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+function load(key, fallback) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(key) || 'null');
+    return saved ? mergeFallback(saved, fallback) : clone(fallback);
+  } catch {
+    return clone(fallback);
+  }
+}
+
+function applyDataModeMigration() {
+  if (localStorage.getItem('ytFinanceDataMode') === dataModeVersion) return;
+  localStorage.setItem('ytFinanceEntries', '[]');
+  localStorage.setItem('ytFinanceDataMode', dataModeVersion);
+}
+
+function loadEntries() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('ytFinanceEntries') || 'null');
+    if (!Array.isArray(saved)) return [];
+    const isOnlyLegacyDemo = saved.length > 0 && saved.every(entry => legacyDemoTitles.has(entry.title));
+    if (isOnlyLegacyDemo) {
+      localStorage.setItem('ytFinanceEntries', '[]');
+      return [];
+    }
+    return saved;
+  } catch {
+    return [];
+  }
+}
+
+function mergeFallback(saved, fallback) {
+  if (Array.isArray(fallback)) return saved;
+  const merged = { ...clone(fallback), ...saved };
+  Object.keys(fallback).forEach(key => {
+    if (Array.isArray(fallback[key]) && Array.isArray(saved[key])) {
+      merged[key] = [...fallback[key], ...saved[key].filter(item => !fallback[key].includes(item))];
+    }
+  });
+  return merged;
+}
+
+function init() {
+  $('date').valueAsDate = new Date();
+  document.querySelectorAll('nav a').forEach(link => link.addEventListener('click', () => setView(link.dataset.view)));
+  $('monthFilter').addEventListener('change', () => {
+    selectedMonth = $('monthFilter').value;
+    render();
+  });
+  $('type').addEventListener('change', updateCategories);
+  $('entryForm').addEventListener('submit', addEntry);
+  $('categoryForm').addEventListener('submit', addCategory);
+  $('settingsForm').addEventListener('submit', saveSettingsForm);
+  $('printBtn').addEventListener('click', printReport);
+  $('resetBtn').addEventListener('click', resetDemo);
+  hydrateSettingsForm();
+  applySettings();
+  updateMonthFilter();
+  updateCategories();
+  renderCategories();
+  setView('dashboard');
+  render();
+}
+
+function setView(view) {
+  activeView = view;
+  document.querySelectorAll('nav a').forEach(link => link.classList.toggle('active', link.dataset.view === view));
+  document.querySelectorAll('[data-section]').forEach(section => {
+    section.hidden = !section.dataset.section.split(' ').includes(view);
+  });
+  if (view === 'income') $('type').value = 'income';
+  if (view === 'expense' || view === 'salary') $('type').value = 'expense';
+  if (view === 'salary') $('category').value = 'เงินเดือนทีมงาน';
+  updateCategories();
+  requestAnimationFrame(() => render());
+}
+
+function updateCategories() {
+  const selected = $('category').value;
+  const type = $('type').value;
+  const list = categories[type] || [];
+  $('category').innerHTML = list.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  if (list.includes(selected)) $('category').value = selected;
+  if (activeView === 'salary' && list.includes('เงินเดือนทีมงาน')) $('category').value = 'เงินเดือนทีมงาน';
+}
+
+function addEntry(e) {
+  e.preventDefault();
+  const entry = {
+    date: $('date').value,
+    title: $('title').value.trim(),
+    type: $('type').value,
+    category: $('category').value,
+    amount: +$('amount').value,
+    note: $('note').value.trim()
+  };
+  entries.unshift(entry);
+  selectedMonth = getEntryMonthKey(entry) || selectedMonth;
+  saveEntries();
+  e.target.reset();
+  $('date').valueAsDate = new Date();
+  updateMonthFilter();
+  updateCategories();
+  render();
+  showToast('เพิ่มรายการแล้ว');
+}
+
+function del(i) {
+  entries.splice(i, 1);
+  saveEntries();
+  updateMonthFilter();
+  render();
+  showToast('ลบรายการแล้ว');
+}
+
+function addCategory(e) {
+  e.preventDefault();
+  const type = $('newCategoryType').value;
+  const name = $('newCategoryName').value.trim();
+  if (!name) return;
+  if (categories[type].some(cat => cat.toLowerCase() === name.toLowerCase())) {
+    showToast('มีหมวดหมู่นี้แล้ว');
+    return;
+  }
+  categories[type].push(name);
+  saveCategories();
+  e.target.reset();
+  renderCategories();
+  updateCategories();
+  showToast('เพิ่มหมวดหมู่แล้ว');
+}
+
+function removeCategory(type, name) {
+  const used = entries.some(entry => entry.type === type && entry.category === name);
+  if (used) {
+    showToast('ลบไม่ได้ เพราะมีรายการใช้หมวดนี้อยู่');
+    return;
+  }
+  categories[type] = categories[type].filter(cat => cat !== name);
+  saveCategories();
+  renderCategories();
+  updateCategories();
+}
+
+function renderCategories() {
+  $('incomeCategoryList').innerHTML = renderCategoryPills('income');
+  $('expenseCategoryList').innerHTML = renderCategoryPills('expense');
+}
+
+function renderCategoryPills(type) {
+  return categories[type].map(name => {
+    const locked = DEFAULT_CATEGORIES[type].includes(name);
+    const button = locked ? '' : `<button type="button" onclick="removeCategory('${type}', '${escapeJs(name)}')">×</button>`;
+    return `<span class="pill">${escapeHtml(name)}${button}</span>`;
+  }).join('');
+}
+
+function hydrateSettingsForm() {
+  $('settingDashboardName').value = settings.dashboardName;
+  $('settingProfileName').value = settings.profileName;
+  $('settingCurrency').value = settings.currency;
+  $('settingTheme').value = settings.theme;
+}
+
+function saveSettingsForm(e) {
+  e.preventDefault();
+  settings = {
+    dashboardName: $('settingDashboardName').value.trim() || DEFAULT_SETTINGS.dashboardName,
+    profileName: $('settingProfileName').value.trim() || DEFAULT_SETTINGS.profileName,
+    currency: $('settingCurrency').value.trim() || DEFAULT_SETTINGS.currency,
+    theme: $('settingTheme').value
+  };
+  saveSettings();
+  applySettings();
+  render();
+  showToast('บันทึกการตั้งค่าแล้ว');
+}
+
+function applySettings() {
+  $('dashboardTitle').textContent = settings.dashboardName;
+  $('profileName').textContent = settings.profileName;
+  document.body.classList.toggle('compactTheme', settings.theme === 'compact');
+}
+
+function printReport() {
+  document.querySelector('.heroText p').dataset.reportMonth = getMonthLabel(selectedMonth);
+  window.print();
+}
+
+function resetDemo() {
+  entries = [];
+  saveEntries();
+  selectedMonth = getCurrentMonthKey();
+  updateMonthFilter();
+  render();
+  showToast('ล้างข้อมูลแล้ว');
+}
+
+function render() {
+  const visibleEntries = getVisibleEntries();
+  const income = sum(visibleEntries.filter(e => e.type === 'income'));
+  const expense = sum(visibleEntries.filter(e => e.type === 'expense'));
+  const profit = income - expense;
+  $('incomeTotal').textContent = fmt(income);
+  $('expenseTotal').textContent = fmt(expense);
+  $('netProfit').textContent = fmt(profit);
+  $('yearProfit').textContent = fmt(profit);
+  $('sponsorTotal').textContent = fmt(sum(visibleEntries.filter(e => e.category === 'สปอนเซอร์')));
+  $('travelTotal').textContent = fmt(sum(visibleEntries.filter(e => e.category === 'ค่าเดินทาง')));
+  $('salaryTotal').textContent = fmt(sum(visibleEntries.filter(e => e.category === 'เงินเดือนทีมงาน')));
+  $('miniIncome').textContent = fmt(income);
+  $('miniExpense').textContent = fmt(expense);
+  $('miniProfit').textContent = fmt(profit);
+  renderTable();
+  drawBar();
+  drawDonut();
+}
+
+function renderTable() {
+  let rows = getVisibleEntries();
+  if (activeView === 'income') rows = rows.filter(e => e.type === 'income');
+  if (activeView === 'expense') rows = rows.filter(e => e.type === 'expense');
+  if (activeView === 'salary') rows = rows.filter(e => e.category === 'เงินเดือนทีมงาน');
+  $('tbody').innerHTML = rows.map((e) => {
+    const i = entries.indexOf(e);
+    return `<tr><td>${new Date(e.date).toLocaleDateString('th-TH')}</td><td>${escapeHtml(e.title)}</td><td><span class="tag ${e.type}">${e.type === 'income' ? 'รายรับ' : 'รายจ่าย'}</span></td><td>${escapeHtml(e.category)}</td><td>${e.type === 'income' ? fmt(e.amount) : '-'}</td><td>${e.type === 'expense' ? fmt(e.amount) : '-'}</td><td>${escapeHtml(e.note || '')}</td><td><button class="del" type="button" onclick="del(${i})">⌫</button></td></tr>`;
+  }).join('');
+}
+
+function sum(arr) {
+  return arr.reduce((a, b) => a + (+b.amount || 0), 0);
+}
+
+function getCurrentMonthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getEntryMonthKey(entry) {
+  if (!entry.date) return '';
+  const date = new Date(entry.date);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getMonthLabel(key) {
+  const [year, month] = key.split('-').map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+}
+
+function updateMonthFilter() {
+  const monthKeys = new Set([getCurrentMonthKey(), ...entries.map(getEntryMonthKey).filter(Boolean)]);
+  const sortedKeys = [...monthKeys].sort((a, b) => b.localeCompare(a));
+  if (!sortedKeys.includes(selectedMonth)) selectedMonth = sortedKeys[0] || getCurrentMonthKey();
+  $('monthFilter').innerHTML = sortedKeys.map(key => `<option value="${key}">${getMonthLabel(key)}</option>`).join('');
+  $('monthFilter').value = selectedMonth;
+}
+
+function getVisibleEntries() {
+  return entries.filter(entry => getEntryMonthKey(entry) === selectedMonth);
+}
+
+function getMonthlyTotals() {
+  const monthMap = new Map();
+  getVisibleEntries().forEach(entry => {
+    if (!entry.date) return;
+    const date = new Date(entry.date);
+    if (Number.isNaN(date.getTime())) return;
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (!monthMap.has(key)) {
+      monthMap.set(key, {
+        label: date.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }),
+        income: 0,
+        expense: 0
+      });
+    }
+    monthMap.get(key)[entry.type === 'income' ? 'income' : 'expense'] += +entry.amount || 0;
+  });
+  return [...monthMap.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value);
+}
+
+function setupCanvas(canvas) {
+  const ratio = Math.min(window.devicePixelRatio || 1, 2);
+  const rect = canvas.getBoundingClientRect();
+  const width = Math.max(320, Math.floor(rect.width || canvas.parentElement.clientWidth || 320));
+  const height = Math.max(210, Math.floor(rect.height || 210));
+  canvas.width = Math.floor(width * ratio);
+  canvas.height = Math.floor(height * ratio);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  return { ctx, w: width, h: height };
+}
+
+function drawBar() {
+  const c = $('barChart');
+  if (!c || c.closest('[hidden]')) return;
+  const { ctx, w, h } = setupCanvas(c);
+  const monthly = getMonthlyTotals();
+  if (!monthly.length) {
+    ctx.fillStyle = '#aeb4bf';
+    ctx.font = '20px Kanit';
+    ctx.textAlign = 'center';
+    ctx.fillText('ยังไม่มีข้อมูลรายรับรายจ่าย', w / 2, h / 2);
+    ctx.textAlign = 'left';
+    return;
+  }
+  const max = Math.max(...monthly.map(m => Math.max(m.income, m.expense)), 1) * 1.18;
+  const top = 34;
+  const left = 34;
+  const right = 12;
+  const bottom = 34;
+  const base = h - bottom;
+  const plotW = w - left - right;
+  const plotH = base - top;
+  const gap = plotW / monthly.length;
+  const barW = Math.max(8, Math.min(18, (gap - 12) / 2));
+  ctx.strokeStyle = '#343944';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 5; i++) {
+    const y = base - i * plotH / 4;
+    ctx.beginPath();
+    ctx.moveTo(left, y);
+    ctx.lineTo(w - right, y);
+    ctx.stroke();
+  }
+  monthly.forEach((m, i) => {
+    const center = left + gap * i + gap / 2;
+    const x = center - barW - 3;
+    const bh = m.income / max * plotH;
+    const eh = m.expense / max * plotH;
+    ctx.fillStyle = '#61d36b';
+    ctx.fillRect(x, base - bh, barW, bh);
+    ctx.fillStyle = '#f25b57';
+    ctx.fillRect(x + barW + 6, base - eh, barW, eh);
+    ctx.fillStyle = '#c8ccd4';
+    ctx.font = '11px Kanit';
+    ctx.textAlign = 'center';
+    ctx.fillText(m.label, center, base + 20);
+  });
+  ctx.textAlign = 'left';
+  ctx.font = '13px Kanit';
+  ctx.fillStyle = '#61d36b';
+  ctx.fillText('■ รายรับ', left, 20);
+  ctx.fillStyle = '#f25b57';
+  ctx.fillText('■ รายจ่าย', left + 92, 20);
+}
+
+function drawDonut() {
+  const c = $('donutChart');
+  if (!c || c.closest('[hidden]')) return;
+  const { ctx, w, h } = setupCanvas(c);
+  const visibleEntries = getVisibleEntries();
+  const cats = categories.expense.map(cat => ({ cat, val: sum(visibleEntries.filter(e => e.type === 'expense' && e.category === cat)) })).filter(x => x.val > 0);
+  const total = sum(cats);
+  const colors = ['#f25252', '#65d6a6', '#c94fd9', '#ffbd35', '#61b6ff', '#8f88a8', '#f084c5', '#49c7c1', '#d6d65d', '#ff8d45'];
+  let start = -Math.PI / 2;
+  const chartX = Math.min(160, w * 0.32);
+  const chartY = h / 2;
+  const radius = Math.min(72, h * 0.36, w * 0.22);
+  const hole = radius * 0.52;
+  if (!total) {
+    ctx.fillStyle = '#aeb4bf';
+    ctx.font = '24px Kanit';
+    ctx.textAlign = 'center';
+    ctx.fillText('ยังไม่มีรายจ่าย', w / 2, h / 2);
+    ctx.textAlign = 'left';
+    return;
+  }
+  cats.forEach((x, i) => {
+    const a = x.val / total * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(chartX, chartY);
+    ctx.arc(chartX, chartY, radius, start, start + a);
+    ctx.closePath();
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+    start += a;
+  });
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  ctx.arc(chartX, chartY, hole, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = '#fff';
+  ctx.font = '16px Kanit';
+  ctx.textAlign = 'center';
+  ctx.fillText('รวม', chartX, chartY - 8);
+  ctx.fillText('100%', chartX, chartY + 16);
+  ctx.textAlign = 'left';
+  const legendX = Math.min(w - 210, chartX + radius + 34);
+  cats.slice(0, 7).forEach((x, i) => {
+    const percent = total ? (x.val / total * 100).toFixed(1) : '0.0';
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fillRect(legendX, 22 + i * 25, 13, 13);
+    ctx.fillStyle = '#e7eaf0';
+    ctx.font = '14px Kanit';
+    ctx.fillText(`${x.cat} ${percent}%`, legendX + 21, 34 + i * 25);
+  });
+}
+
+function showToast(message) {
+  const toast = $('toast');
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.hidden = true, 1800);
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
+function escapeJs(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+init();
